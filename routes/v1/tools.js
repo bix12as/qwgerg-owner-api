@@ -38,7 +38,6 @@ const generateRandomKeys = (numKeys) => {
 };
 
 // Admin Command to generate keys and save to keys.json
-// /v1/tools/coderx/ad-keys?username=admin&password=wevbin&numKeys=5
 router.get('/coderx/ad-keys', async (req, res) => {
   try {
     const { username, password, numKeys = 5, filePath } = req.query;
@@ -73,7 +72,6 @@ router.get('/coderx/ad-keys', async (req, res) => {
 });
 
 // API to get the first key, remove it and return it
-// /v1/tools/coderx/get-keys?getKeyKey=1
 router.get('/coderx/get-keys', async (req, res) => {
   try {
     const { getKeyKey } = req.query;
