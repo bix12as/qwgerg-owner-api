@@ -31,13 +31,15 @@ const writeKeysToFile = (filePath, keys) => {
 const generateRandomKeys = (numKeys) => {
   const keys = [];
   for (let i = 0; i < numKeys; i++) {
-    const randomKey = Math.random().toString(36).substring(2, 8);
+    const randomKey = Math.random().toString(36).substring(2, 10); // Ensures 8 characters
     keys.push(randomKey);
   }
   return keys;
 };
 
+
 // Admin Command to generate keys and save to keys.json
+// /v1/tools/coderx/ad-keys?username=admin&password=wevbin&numKeys=5
 router.get('/coderx/ad-keys', async (req, res) => {
   try {
     const { username, password, numKeys = 5, filePath } = req.query;
@@ -72,6 +74,8 @@ router.get('/coderx/ad-keys', async (req, res) => {
 });
 
 // API to get the first key, remove it and return it
+// /v1/tools/coderx/get-keys?getKeyKey=1
+/*
 router.get('/coderx/get-keys', async (req, res) => {
   try {
     const { getKeyKey } = req.query;
@@ -108,5 +112,42 @@ router.get('/coderx/get-keys', async (req, res) => {
     res.status(500).json({ error: 'Server error, please try again later.' });
   }
 });
+*/
+router.get('/coderx/get-keys', async (req, res) => {
+  try {
+    const { getKeyKey } = req.query;
+
+    // Validate the 'getKeyKey' parameter
+    const numKeysToRetrieve = parseInt(getKeyKey, 10);
+    if (isNaN(numKeysToRetrieve) || numKeysToRetrieve <= 0) {
+      return res.status(400).json({ error: 'Invalid number of keys requested.' });
+    }
+
+    const keysFilePath = './keys.json';
+
+    // Read the current keys from the file
+    const currentKeys = readKeysFromFile(keysFilePath);
+
+    // Check if there are enough keys to retrieve
+    if (numKeysToRetrieve > currentKeys.length) {
+      return res.status(400).json({ error: 'Not enough keys available to retrieve.' });
+    }
+
+    // Select the specified number of keys without removing them
+    const retrievedKeys = currentKeys.slice(0, numKeysToRetrieve);
+
+    res.json({
+      success: true,
+      message: `${numKeysToRetrieve} keys have been successfully retrieved.`,
+      keys: retrievedKeys,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error, please try again later.' });
+  }
+});
+
+
+
 
 module.exports = router;
