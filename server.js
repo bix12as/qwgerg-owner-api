@@ -42,18 +42,19 @@ app.get('/api/request-count', (req, res) => {
   res.json({ count: apiRequestCount });
 });
 
-// Endpoint to claim a prize
+
 app.post('/claim', (req, res) => {
   const { key } = req.body;
 
   // Read keys.json to check for the key
-  fs.readFile('keys.json', 'utf8', (err, data) => {
+  fs.readFile('keys.json', 'utf8', (err, keysData) => {
     if (err) {
       return res.status(500).json({ error: 'Could not read keys file.' });
     }
 
-    const keys = JSON.parse(data);
+    const keys = JSON.parse(keysData);
 
+    // Check if the key exists in the keys array
     if (keys.includes(key)) {
       // If key exists, remove it from the array
       const updatedKeys = keys.filter(existingKey => existingKey !== key);
@@ -64,17 +65,42 @@ app.post('/claim', (req, res) => {
           return res.status(500).json({ error: 'Failed to update keys file.' });
         }
 
-        // Generate WhatsApp message API link
-        const whatsappMessage = `https://wa.me/27717311486?text=I%20just%20claimed%20my%20prize%20with%20the%20*key*%3A%20${key}%0A%0ACODERX%20SOCIAL%20SERVICE`;
+        // Read rewards.json to find the matching reward and get its description
+        fs.readFile('rewards.json', 'utf8', (rewardErr, rewardsData) => {
+          if (rewardErr) {
+            return res.status(500).json({ error: 'Could not read rewards file.' });
+          }
 
-        // Send the response with the WhatsApp link
-        res.json({ success: true, whatsappLink: whatsappMessage });
+          const rewards = JSON.parse(rewardsData);
+
+          // Get the first reward (or modify to match a particular reward logic)
+          const reward = rewards[0];  // Assuming we need the first reward as per your example
+
+          if (!reward) {
+            return res.status(400).json({ error: 'Reward not found.' });
+          }
+
+          // Generate WhatsApp message API link with the reward details
+          const whatsappMessage = `https://wa.me/27717311486?text=Congratulations%20you%20just%20claimed%20your%20reward!%0A%0AUsed%20Key%3A%20*${key}*%0AAPI%20Key%3A%20*${reward.keys}*%0ADescription%3A%20${encodeURIComponent(reward.description)}%0A%0AThank%20you%20for%20using%20Nebula%20Bot!`;
+
+          // Send the response with the reward details, key, and WhatsApp link
+          res.json({ 
+            success: true, 
+            reward: `API REWARDS key: ${key} - ${reward.description}`, 
+            whatsappLink: whatsappMessage 
+          });
+        });
       });
     } else {
       res.status(400).json({ error: 'Invalid or used key.' });
     }
   });
 });
+
+
+
+
+
 
 // Catch-all route for any other requests (fallback to your HTML file)
 app.get('*', (req, res) => {
