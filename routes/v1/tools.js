@@ -150,4 +150,111 @@ router.get('/coderx/get-keys', async (req, res) => {
 
 
 
+
+// /v1/tools/coderx/ad-rewards?username=admin&password=wevbin&Keys=1&description=Free
+router.get('/coderx/ad-rewards', async (req, res) => {
+  try {
+    const { username, password, Keys, description, filePath } = req.query; // Changed keys to Keys
+
+    // Validate credentials
+    if (username !== 'admin' || password !== 'wevbin') {
+      return res.status(403).json({ error: 'Invalid username or password.' });
+    }
+
+    // Validate input parameters
+    if (!Keys || isNaN(Keys) || Keys <= 0) { // Changed keys to Keys
+      return res.status(400).json({ error: 'Invalid or missing "Keys" parameter.' });
+    }
+
+    if (!description) {
+      return res.status(400).json({ error: 'Description is required.' });
+    }
+
+    // Default file path if not provided
+    const rewardsFilePath = filePath || './rewards.json';
+
+    // Generate the random keys
+    const generatedKeys = generateRandomKeys(Number(Keys)); // Changed keys to Keys
+
+    // Read current rewards from the file
+    const currentRewards = readKeysFromFile(rewardsFilePath);
+
+    // Create rewards objects with descriptions and add to current rewards
+    const newRewards = generatedKeys.map(keys => ({
+      keys,
+      description,
+    }));
+    currentRewards.push(...newRewards);
+
+    // Save the updated rewards back to the file
+    writeKeysToFile(rewardsFilePath, currentRewards);
+
+    res.json({
+      success: true,
+      message: `${Keys} rewards have been successfully generated and saved.`,
+      rewards: newRewards,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error, please try again later.' });
+  }
+});
+
+
+// Endpoint to claim a reward (delete it from rewards.json)
+// /v1/tools/coderx/claim-rewards?key=Abc123X
+function readRewardsFromFile(filePath) {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data); // Parse the JSON data into an object
+  } catch (error) {
+    throw new Error('Could not read rewards file');
+  }
+}
+
+// Function to write updated rewards to the file
+function writeRewardsToFile(filePath, rewards) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(rewards, null, 2), 'utf8');
+  } catch (error) {
+    throw new Error('Could not write to rewards file');
+  }
+}
+
+// Endpoint to claim a reward (delete it from rewards.json)
+// /v1/tools/coderx/claim-rewards?key=m20po4p5
+router.get('/coderx/claim-rewards', async (req, res) => {
+  try {
+    const { key, filePath } = req.query;
+
+    // Default file path if not provided
+    const rewardsFilePath = filePath || './rewards.json';
+
+    // Read current rewards from the file
+    const currentRewards = readRewardsFromFile(rewardsFilePath);
+
+    // Find the index of the key in the rewards
+    const keyIndex = currentRewards.findIndex(reward => reward.keys === key);
+
+    if (keyIndex === -1) {
+      return res.status(400).json({ error: 'Invalid or already claimed key.' });
+    }
+
+    // Remove the key from the rewards array
+    const updatedRewards = currentRewards.filter(reward => reward.keys !== key);
+
+    // Save the updated rewards back to the file
+    writeRewardsToFile(rewardsFilePath, updatedRewards);
+
+    // Send the success response
+    res.json({
+      success: true,
+      message: `Reward with key ${key} has been successfully claimed. Contact Owner again to get ur reward.`,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error, please try again later.' });
+  }
+});
+
 module.exports = router;
