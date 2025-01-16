@@ -69,6 +69,24 @@ router.get('/coderx/inv', (req, res) => {
 });
 
 
+// /v2/inv/coderx/check-inv
+router.get('/coderx/check-inv', (req, res) => {
+    // Read the current inventory
+    const inventory = readInventory();
+
+    // Check if inventory is empty
+    if (!inventory || inventory.length === 0) {
+        return res.status(404).json({ error: "No items found in the inventory." });
+    }
+
+    // Return the inventory as a response
+    return res.status(200).json({
+        message: "Inventory retrieved successfully",
+        inventory: inventory
+    });
+});
+
+
 
 // API route to handle purchase and remove the item
 // /v2/inv//coderx/purchase?itemName=thisis
