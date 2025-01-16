@@ -46,7 +46,6 @@ router.get('/coderx/inv', (req, res) => {
 
     // Create the new item object
     const newItem = {
-        id: `item${Date.now()}`, // Use timestamp as unique ID for the item
         name: description.split(' ')[0], // Use the first word of the description as the name (just an example)
         price: costNumber,
         description: description
@@ -63,7 +62,6 @@ router.get('/coderx/inv', (req, res) => {
 
     // Return the created item as a response
     return res.status(200).json({
-        message: "Item added to inventory",
         item: newItem
     });
 });
@@ -81,7 +79,6 @@ router.get('/coderx/check-inv', (req, res) => {
 
     // Return the inventory as a response
     return res.status(200).json({
-        message: "Inventory retrieved successfully",
         inventory: inventory
     });
 });
@@ -116,7 +113,6 @@ router.get('/coderx/purchase', (req, res) => {
 
     // Return a success response with the details of the purchased item
     return res.status(200).json({
-        message: "Purchase successful!",
         purchasedItem
     });
 });
