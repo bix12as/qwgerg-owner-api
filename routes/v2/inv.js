@@ -29,13 +29,13 @@ const writeInventory = (inventory) => {
 };
 
 // API route to add an item to inventory
-// /v2/inv/coderx/inv?cost=300&description=thisis%20for%20protection
+// /v2/inv/coderx/inv?id=promo&cost=300&description=thisis%20for%20protection
 router.get('/coderx/inv', (req, res) => {
-    const { cost, description } = req.query;
+    const { id, cost, description } = req.query;
 
     // Validate query parameters
-    if (!cost || !description) {
-        return res.status(400).json({ error: "Missing required parameters: cost and description." });
+    if (!id || !cost || !description) {
+        return res.status(400).json({ error: "Missing required parameters: id, cost, and description." });
     }
 
     // Validate that cost is a number
@@ -44,9 +44,10 @@ router.get('/coderx/inv', (req, res) => {
         return res.status(400).json({ error: "Cost must be a positive number." });
     }
 
-    // Create the new item object
+    // Create the new item object with the provided id, name, price, and description
     const newItem = {
-        name: description.split(' ')[0], // Use the first word of the description as the name (just an example)
+        id: id, // Use the provided id
+        name: description.split(' ').slice(0, 3).join(' '), // Take the first 3 words of the description as the name
         price: costNumber,
         description: description
     };
@@ -67,6 +68,8 @@ router.get('/coderx/inv', (req, res) => {
 });
 
 
+
+
 // /v2/inv/coderx/check-inv
 router.get('/coderx/check-inv', (req, res) => {
     // Read the current inventory
@@ -85,21 +88,21 @@ router.get('/coderx/check-inv', (req, res) => {
 
 
 
-// API route to handle purchase and remove the item
-// /v2/inv//coderx/purchase?itemName=thisis
+// API route to handle purchase and remove the item by ID
+// /v2/inv/coderx/purchase?id=promo
 router.get('/coderx/purchase', (req, res) => {
-    const { itemName } = req.query;
+    const { id } = req.query;
 
     // Validate query parameter
-    if (!itemName) {
-        return res.status(400).json({ error: "Missing required parameter: itemName." });
+    if (!id) {
+        return res.status(400).json({ error: "Missing required parameter: id." });
     }
 
     // Get the current inventory
     const inventory = readInventory();
 
-    // Find the item in the inventory by name
-    const itemIndex = inventory.findIndex(item => item.name.toLowerCase() === itemName.toLowerCase());
+    // Find the item in the inventory by id
+    const itemIndex = inventory.findIndex(item => item.id.toLowerCase() === id.toLowerCase());
 
     if (itemIndex === -1) {
         return res.status(404).json({ error: "Item not found in inventory." });
@@ -116,5 +119,6 @@ router.get('/coderx/purchase', (req, res) => {
         purchasedItem
     });
 });
+
 
 module.exports = router;
