@@ -6,6 +6,7 @@ const fs = require('fs');
 // Import routes (v1)
 
 const v1tools = require('./routes/v1/tools');
+const v1pokemon = require('./routes/v1/pokemon');
 const v2inv = require('./routes/v2/inv');
 
 
@@ -35,6 +36,7 @@ app.use(apiRequestCounter);
 
 
 app.use('/v1/tools', v1tools);
+app.use('/v1/pokemon', v1pokemon);
 
 app.use('/v2/inv', v2inv);
 
