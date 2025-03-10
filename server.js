@@ -1,3 +1,5 @@
+
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -6,7 +8,7 @@ const fs = require('fs');
 // Import routes (v1)
 
 const v1tools = require('./routes/v1/tools');
-const v1pokemon = require('./routes/v1/pokemon');
+const v1spam = require('./routes/v1/spam');
 const v2inv = require('./routes/v2/inv');
 
 
@@ -36,8 +38,7 @@ app.use(apiRequestCounter);
 
 
 app.use('/v1/tools', v1tools);
-app.use('/v1/pokemon', v1pokemon);
-
+app.use('/v1/spam', v1spam);
 app.use('/v2/inv', v2inv);
 
 // Endpoint to get the API request count
@@ -114,4 +115,3 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
